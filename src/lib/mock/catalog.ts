@@ -10,10 +10,11 @@ import type {
 } from '@/lib/types';
 
 // Content in this file is sourced (with the site owner's permission) from
-// the live armeringsmaskiner.se, downloaded 2026-08-11. Images live in
-// /public/images/products, documents in /public/documents/{gms,ogura} —
-// both are staging locations; see the pending "migrate images to Supabase
-// Storage" task for the permanent home.
+// the live armeringsmaskiner.se, downloaded 2026-08-11. Images and documents
+// live in Supabase Storage (product-images / documents buckets) — see
+// scripts/migrate-storage.ts for how they got there.
+
+const STORAGE_BASE_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public`;
 
 export const brands: Brand[] = [
   {
@@ -88,7 +89,7 @@ export const categories: Category[] = [
 function img(filename: string, id?: string): ProductImage {
   return {
     id: id ?? `img-${filename}`,
-    url: `/images/products/${filename}`,
+    url: `${STORAGE_BASE_URL}/product-images/${filename}`,
     altText: null,
     sortOrder: 0,
   };
@@ -97,7 +98,7 @@ function img(filename: string, id?: string): ProductImage {
 function images(filenames: string[]): ProductImage[] {
   return filenames.map((filename, i) => ({
     id: `img-${filename}-${i}`,
-    url: `/images/products/${filename}`,
+    url: `${STORAGE_BASE_URL}/product-images/${filename}`,
     altText: null,
     sortOrder: i,
   }));
@@ -152,31 +153,31 @@ const catStation = categories[4];
 const mgBdManual = doc(
   'doc-mg-16-20-bd-manual',
   'MG 16 BD / MG 20 BD – Manual för användare',
-  '/documents/gms/MG-16-BD-MG-20-BD-manual-2022-03-24.pdf',
+  `${STORAGE_BASE_URL}/documents/gms/MG-16-BD-MG-20-BD-manual-2022-03-24.pdf`,
   'manual',
 );
 const bdSeriesProgrammingManual = doc(
   'doc-bd-series-programming',
   'Digital Benders BD Series – Programmeringsmanual',
-  '/documents/gms/GMS_725.1_ENGLISH.pdf',
+  `${STORAGE_BASE_URL}/documents/gms/GMS_725.1_ENGLISH.pdf`,
   'manual',
 );
 const hSeriesManual = doc(
   'doc-h-series-manual',
   'H Series Hydraulic Rebar Cutters – Manual',
-  '/documents/gms/HYDRAULIC-CUTTING-MACHINE-USER-MANUAL-H-SERIES.pdf',
+  `${STORAGE_BASE_URL}/documents/gms/HYDRAULIC-CUTTING-MACHINE-USER-MANUAL-H-SERIES.pdf`,
   'manual',
 );
 const shearlineDoubleBenderBrochure = doc(
   'doc-shearline-doublebender-brochure',
   'Broschyr: Synclone & Matrix industrilösningar',
-  '/documents/gms/GMS-Shearline-DoubleBender.pdf',
+  `${STORAGE_BASE_URL}/documents/gms/GMS-Shearline-DoubleBender.pdf`,
   'broschyr',
 );
 const hcc1619Manual = doc(
   'doc-hcc-16-19-manual',
   'HCC-16BL / HCC-19BL – Manual',
-  '/documents/ogura/HCC-19_16BL-Instruction-Manual.pdf',
+  `${STORAGE_BASE_URL}/documents/ogura/HCC-19_16BL-Instruction-Manual.pdf`,
   'manual',
 );
 
@@ -896,7 +897,7 @@ export const products: ProductDetail[] = [
       doc(
         'doc-hcc-13df-manual',
         'HCC-13DF – Manual',
-        '/documents/ogura/HCC-19-13DF-Instruction-Manual.pdf',
+        `${STORAGE_BASE_URL}/documents/ogura/HCC-19-13DF-Instruction-Manual.pdf`,
         'manual',
       ),
     ],
@@ -1035,7 +1036,7 @@ export const products: ProductDetail[] = [
       doc(
         'doc-hsc-25bl-datasheet',
         'HSC-25BL – Datablad',
-        '/documents/ogura/Ogura-HSC-Flush-Cutter-Data-Sheet.pdf',
+        `${STORAGE_BASE_URL}/documents/ogura/Ogura-HSC-Flush-Cutter-Data-Sheet.pdf`,
         'manual',
       ),
     ],
@@ -1079,7 +1080,12 @@ export const products: ProductDetail[] = [
       'Hydraulolja',
     ]),
     documents: [
-      doc('doc-hbc-225-manual', 'HBC-225 – Manual', '/documents/ogura/HBC-225.pdf', 'manual'),
+      doc(
+        'doc-hbc-225-manual',
+        'HBC-225 – Manual',
+        `${STORAGE_BASE_URL}/documents/ogura/HBC-225.pdf`,
+        'manual',
+      ),
     ],
   },
   {
@@ -1368,55 +1374,55 @@ export const brandDocuments: DocumentItem[] = [
   doc(
     'doc-gms-warranty-conditions',
     'GMS Warranty Certificate (allmänna garantivillkor)',
-    '/documents/gms/GMS-GENERAL-WARRANTY-CONDITIONS.pdf',
+    `${STORAGE_BASE_URL}/documents/gms/GMS-GENERAL-WARRANTY-CONDITIONS.pdf`,
     'garanti',
   ),
   doc(
     'doc-gms-ce-benders',
     'Bockmaskiner – Certificate of Conformity (CE)',
-    '/documents/gms/GMS-CE-certificate-benders.pdf',
+    `${STORAGE_BASE_URL}/documents/gms/GMS-CE-certificate-benders.pdf`,
     'certifikat',
   ),
   doc(
     'doc-gms-ce-cutters',
     'Klippmaskiner – Certificate of Conformity (CE)',
-    '/documents/gms/GMS-CE-certificate-cutters.pdf',
+    `${STORAGE_BASE_URL}/documents/gms/GMS-CE-certificate-cutters.pdf`,
     'certifikat',
   ),
   doc(
     'doc-gms-garantibevis',
     'Armeringsmaskiner.se – Garantibevis',
-    '/documents/gms/Garantibevis-armeringsmaskiner-1.pdf',
+    `${STORAGE_BASE_URL}/documents/gms/Garantibevis-armeringsmaskiner-1.pdf`,
     'garanti',
   ),
   doc(
     'doc-gms-iso-9001-1',
     'ISO 9001 Certificate (1)',
-    '/documents/gms/GMS-ISO-9001-2015-2.pdf',
+    `${STORAGE_BASE_URL}/documents/gms/GMS-ISO-9001-2015-2.pdf`,
     'certifikat',
   ),
   doc(
     'doc-gms-iso-9001-2',
     'ISO 9001 Certificate (2)',
-    '/documents/gms/GMS-ISO-9001-2015-1.pdf',
+    `${STORAGE_BASE_URL}/documents/gms/GMS-ISO-9001-2015-1.pdf`,
     'certifikat',
   ),
   doc(
     'doc-gms-code-of-conduct',
     'GMS Code of Conduct',
-    '/documents/gms/GMS-Code-of-Conduct.pdf',
+    `${STORAGE_BASE_URL}/documents/gms/GMS-Code-of-Conduct.pdf`,
     'broschyr',
   ),
   doc(
     'doc-ogura-declaration-of-conformity',
     'Ogura – EC Declaration of Conformity',
-    '/documents/ogura/Ogura-Declaration-of-Conformity.pdf',
+    `${STORAGE_BASE_URL}/documents/ogura/Ogura-Declaration-of-Conformity.pdf`,
     'certifikat',
   ),
   doc(
     'doc-ogura-brochure',
     'Ogura – Broschyr: hydrauliska klipp- och bockmaskiner',
-    '/documents/ogura/Ogura-Brochure-Cutters-Benders.pdf',
+    `${STORAGE_BASE_URL}/documents/ogura/Ogura-Brochure-Cutters-Benders.pdf`,
     'broschyr',
   ),
 ];
