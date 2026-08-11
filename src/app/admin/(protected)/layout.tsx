@@ -13,6 +13,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <Container className="flex h-14 items-center justify-between">
           <nav className="flex items-center gap-4 text-sm font-medium">
             <Link href="/admin">Ordrar &amp; förfrågningar</Link>
+            <Link href="/admin/produkter" className="text-muted-foreground hover:text-foreground">
+              Produkter
+            </Link>
             <Link href="/admin/priser" className="text-muted-foreground hover:text-foreground">
               Priser
             </Link>

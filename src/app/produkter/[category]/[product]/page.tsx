@@ -136,7 +136,7 @@ export default async function ProductPage(props: PageProps<'/produkter/[category
             <div>
               {product.priceExVat ? (
                 <span className="font-mono text-xl font-semibold">
-                  {product.priceExVat} {product.currency} exkl. moms
+                  {Number(product.priceExVat).toLocaleString('sv-SE')} {product.currency} exkl. moms
                 </span>
               ) : (
                 <span className="text-xl font-semibold">Pris på begäran</span>

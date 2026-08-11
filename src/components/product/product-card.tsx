@@ -39,7 +39,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
         <div className="mt-auto pt-3">
           {product.priceExVat ? (
             <span className="font-mono text-sm font-medium">
-              {product.priceExVat} {product.currency} exkl. moms
+              {Number(product.priceExVat).toLocaleString('sv-SE')} {product.currency} exkl. moms
             </span>
           ) : (
             <span className="text-sm font-medium">Pris på begäran</span>
