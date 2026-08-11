@@ -1346,6 +1346,19 @@ export const products: ProductDetail[] = [
   },
 ];
 
+// Fill in real alt text for every product image (accessibility) without
+// repeating the product name at every img()/images() call site above.
+for (const product of products) {
+  if (product.primaryImage && !product.primaryImage.altText) {
+    product.primaryImage.altText = `${product.name} – produktbild`;
+  }
+  product.images.forEach((image, i) => {
+    if (!image.altText) {
+      image.altText = i === 0 ? `${product.name} – produktbild` : `${product.name} – bild ${i + 1}`;
+    }
+  });
+}
+
 // Brand-level documents not tied to a specific product (warranty terms,
 // category-wide CE certificates, ISO certificates, code of conduct).
 // Source PDFs have some image-link vs heading-link mismatches on the old

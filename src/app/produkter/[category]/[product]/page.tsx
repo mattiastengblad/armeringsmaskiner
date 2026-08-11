@@ -10,12 +10,39 @@ import { DocumentList } from '@/components/product/document-list';
 import { SpecTable } from '@/components/product/spec-table';
 import { getAllProductSlugsWithCategory, getProductBySlugs } from '@/lib/data/catalog';
 import { CONTACT } from '@/lib/nav';
+import { absoluteUrl } from '@/lib/site-config';
+import type { ProductDetail } from '@/lib/types';
 
 const STOCK_STATUS_LABEL = {
   kontakta_oss: 'Kontakta oss',
   i_lager: 'I lager',
   bestallningsvara: 'Beställningsvara',
 } as const;
+
+const SCHEMA_AVAILABILITY = {
+  kontakta_oss: 'https://schema.org/PreOrder',
+  i_lager: 'https://schema.org/InStock',
+  bestallningsvara: 'https://schema.org/BackOrder',
+} as const;
+
+function buildProductJsonLd(product: ProductDetail) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.shortDescription ?? product.description ?? undefined,
+    sku: product.sku,
+    brand: { '@type': 'Brand', name: product.brand.name },
+    image: product.images.map((image) => absoluteUrl(image.url)),
+    offers: {
+      '@type': 'Offer',
+      url: absoluteUrl(`/produkter/${product.category.slug}/${product.slug}`),
+      priceCurrency: product.currency,
+      ...(product.priceExVat ? { price: product.priceExVat } : {}),
+      availability: SCHEMA_AVAILABILITY[product.stockStatus],
+    },
+  };
+}
 
 export async function generateStaticParams() {
   const slugs = await getAllProductSlugsWithCategory();
@@ -43,8 +70,14 @@ export default async function ProductPage(props: PageProps<'/produkter/[category
   const product = await getProductBySlugs(category, productSlug);
   if (!product) notFound();
 
+  const jsonLd = buildProductJsonLd(product);
+
   return (
     <Container className="py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+      />
       <nav className="text-muted-foreground mb-6 text-sm">
         <Link href={`/produkter/${product.category.slug}`} className="hover:underline">
           {product.category.name}

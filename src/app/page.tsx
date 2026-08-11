@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { Container } from '@/components/layout/container';
 import { NewsletterForm } from '@/components/layout/newsletter-form';
@@ -48,12 +49,14 @@ export default async function HomePage() {
               Eller ring direkt: {CONTACT.phone}
             </a>
           </div>
-          <div className="bg-muted aspect-video overflow-hidden rounded-xl">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/images/placeholder-product.svg"
-              alt="Armeringsmaskin i drift"
-              className="h-full w-full object-cover"
+          <div className="bg-muted relative aspect-video overflow-hidden rounded-xl">
+            <Image
+              src="/images/products/Par-b.png"
+              alt="Per Lindgren, Armeringsmaskiner.se"
+              fill
+              priority
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="object-cover"
             />
           </div>
         </Container>
