@@ -1,4 +1,7 @@
+import { config } from 'dotenv';
 import { defineConfig, devices } from '@playwright/test';
+
+config({ path: '.env.local' });
 
 const PORT = 3100;
 const baseURL = `http://localhost:${PORT}`;
