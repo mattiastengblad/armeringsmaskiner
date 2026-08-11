@@ -19,7 +19,7 @@ export function getDisplayPrice(product: {
     const prefix = product.hasMultiplePriceVariants ? 'Fr. ' : '';
     return {
       amount: `${prefix}${Math.round(product.computedGrossPriceSek).toLocaleString('sv-SE')} kr`,
-      note: 'Bruttopris, exkl. moms',
+      note: 'exkl. moms',
     };
   }
   return null;
