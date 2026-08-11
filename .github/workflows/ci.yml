@@ -23,8 +23,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Copy placeholder env
-        run: cp .env.example .env.local
+      - name: Write env file
+        run: |
+          cat <<EOF > .env.local
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
+          ORDER_NOTIFICATION_EMAIL=${{ secrets.ORDER_NOTIFICATION_EMAIL }}
+          NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          ADMIN_TEST_EMAIL=${{ secrets.ADMIN_TEST_EMAIL }}
+          ADMIN_TEST_PASSWORD=${{ secrets.ADMIN_TEST_PASSWORD }}
+          EOF
 
       - name: Lint
         run: pnpm lint
