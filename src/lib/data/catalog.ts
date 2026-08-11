@@ -15,6 +15,7 @@ function toSummary(product: ProductDetail): ProductSummary {
     priceExVat,
     currency,
     isFeatured,
+    isPublished,
     category,
     brand,
     primaryImage,
@@ -29,6 +30,7 @@ function toSummary(product: ProductDetail): ProductSummary {
     priceExVat,
     currency,
     isFeatured,
+    isPublished,
     category,
     brand,
     primaryImage,
@@ -44,24 +46,28 @@ export async function getCategoryBySlug(slug: string): Promise<Category | undefi
 }
 
 export async function getFeaturedProducts(): Promise<ProductSummary[]> {
-  return products.filter((p) => p.isFeatured).map(toSummary);
+  return products.filter((p) => p.isPublished && p.isFeatured).map(toSummary);
 }
 
 export async function getProductsByCategorySlug(categorySlug: string): Promise<ProductSummary[]> {
-  return products.filter((p) => p.category.slug === categorySlug).map(toSummary);
+  return products.filter((p) => p.isPublished && p.category.slug === categorySlug).map(toSummary);
 }
 
 export async function getProductBySlugs(
   categorySlug: string,
   productSlug: string,
 ): Promise<ProductDetail | undefined> {
-  return products.find((p) => p.category.slug === categorySlug && p.slug === productSlug);
+  return products.find(
+    (p) => p.isPublished && p.category.slug === categorySlug && p.slug === productSlug,
+  );
 }
 
 export async function getAllProductSlugsWithCategory(): Promise<
   { categorySlug: string; productSlug: string }[]
 > {
-  return products.map((p) => ({ categorySlug: p.category.slug, productSlug: p.slug }));
+  return products
+    .filter((p) => p.isPublished)
+    .map((p) => ({ categorySlug: p.category.slug, productSlug: p.slug }));
 }
 
 export async function getBrands(): Promise<Brand[]> {

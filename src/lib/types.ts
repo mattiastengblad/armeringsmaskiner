@@ -66,6 +66,7 @@ export interface ProductSummary {
   priceExVat: string | null;
   currency: string;
   isFeatured: boolean;
+  isPublished: boolean;
   category: Pick<Category, 'slug' | 'name'>;
   brand: Pick<Brand, 'slug' | 'name'>;
   primaryImage: ProductImage | null;
