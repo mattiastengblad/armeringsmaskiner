@@ -6,6 +6,7 @@ import { ProductCard } from '@/components/product/product-card';
 import { Button } from '@/components/ui/button';
 import { getFeaturedProducts } from '@/lib/data/catalog';
 import { CONTACT, PRODUCT_CATEGORIES } from '@/lib/nav';
+import { productImageUrl } from '@/lib/storage';
 
 const GOCMAKSAN_MILESTONES = [
   'Från små intäkter till stora investeringar',
@@ -51,7 +52,7 @@ export default async function HomePage() {
           </div>
           <div className="bg-muted relative aspect-video overflow-hidden rounded-xl">
             <Image
-              src="/images/products/Par-b.png"
+              src={productImageUrl('Par-b.png')}
               alt="Per Lindgren, Armeringsmaskiner.se"
               fill
               priority

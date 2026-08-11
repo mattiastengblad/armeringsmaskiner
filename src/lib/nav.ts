@@ -43,6 +43,7 @@ export const DOCUMENTATION_BRANDS = [
 export const CONTACT = {
   name: 'Per Lindgren',
   company: 'Pär Bergman Armeringsmaskiner AB',
+  orgNumber: '559328-0950',
   address: 'Beckombergavägen 213, 168 63 Bromma',
   phone: '070-717 29 55',
   phoneHref: 'tel:+46707172955',

@@ -1,3 +1,4 @@
+import { STORAGE_BASE_URL } from '@/lib/storage';
 import type {
   Accessory,
   Brand,
@@ -13,8 +14,6 @@ import type {
 // the live armeringsmaskiner.se, downloaded 2026-08-11. Images and documents
 // live in Supabase Storage (product-images / documents buckets) — see
 // scripts/migrate-storage.ts for how they got there.
-
-const STORAGE_BASE_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public`;
 
 export const brands: Brand[] = [
   {

@@ -1,21 +1,18 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
+import { STOCK_STATUS_BADGE } from '@/lib/status-labels';
 import type { ProductSummary } from '@/lib/types';
 
-const STOCK_STATUS_LABEL: Record<ProductSummary['stockStatus'], string> = {
-  kontakta_oss: 'Kontakta oss',
-  i_lager: 'I lager',
-  bestallningsvara: 'Beställningsvara',
-};
-
 export function ProductCard({ product }: { product: ProductSummary }) {
+  const status = STOCK_STATUS_BADGE[product.stockStatus];
+
   return (
     <Link
       href={`/produkter/${product.category.slug}/${product.slug}`}
-      className="group flex flex-col overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-md"
+      className="group border-border bg-card hover:border-foreground/30 flex flex-col overflow-hidden rounded-lg border transition-colors"
     >
-      <div className="bg-muted relative aspect-square overflow-hidden">
+      <div className="bg-[#efede8] relative aspect-4/3 overflow-hidden">
         {product.primaryImage ? (
           <Image
             src={product.primaryImage.url}
@@ -29,21 +26,23 @@ export function ProductCard({ product }: { product: ProductSummary }) {
             Ingen bild
           </div>
         )}
+        <div className="absolute top-3 left-3">
+          <Badge variant={status.variant}>{status.label}</Badge>
+        </div>
       </div>
       <div className="flex flex-1 flex-col gap-1 p-4">
-        <span className="text-muted-foreground text-xs">{product.brand.name}</span>
-        <h3 className="font-semibold">{product.name}</h3>
+        <span className="text-muted-foreground font-mono text-xs">{product.sku}</span>
+        <h3 className="font-heading font-semibold">{product.name}</h3>
         {product.shortDescription && (
           <p className="text-muted-foreground line-clamp-2 text-sm">{product.shortDescription}</p>
         )}
-        <div className="mt-auto flex items-center justify-between pt-3">
-          <Badge variant="outline">{STOCK_STATUS_LABEL[product.stockStatus]}</Badge>
+        <div className="mt-auto pt-3">
           {product.priceExVat ? (
-            <span className="text-sm font-medium">
+            <span className="font-mono text-sm font-medium">
               {product.priceExVat} {product.currency} exkl. moms
             </span>
           ) : (
-            <span className="text-sm font-medium">Ring för pris</span>
+            <span className="text-sm font-medium">Pris på begäran</span>
           )}
         </div>
       </div>

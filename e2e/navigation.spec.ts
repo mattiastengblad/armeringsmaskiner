@@ -19,7 +19,7 @@ test.describe('Navigation', () => {
     await page.getByRole('link', { name: /BD 36/ }).first().click();
     await expect(page).toHaveURL(/\/produkter\/bockmaskiner\/bd-36$/);
     await expect(page.getByRole('heading', { level: 1 })).toContainText('BD 36');
-    await expect(page.getByText('Specifikationer')).toBeVisible();
+    await expect(page.getByText('Tekniska data')).toBeVisible();
   });
 
   test('unknown product returns 404', async ({ page }) => {

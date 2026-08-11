@@ -12,13 +12,8 @@ import { SpecTable } from '@/components/product/spec-table';
 import { getAllProductSlugsWithCategory, getProductBySlugs } from '@/lib/data/catalog';
 import { CONTACT } from '@/lib/nav';
 import { absoluteUrl } from '@/lib/site-config';
+import { STOCK_STATUS_BADGE } from '@/lib/status-labels';
 import type { ProductDetail } from '@/lib/types';
-
-const STOCK_STATUS_LABEL = {
-  kontakta_oss: 'Kontakta oss',
-  i_lager: 'I lager',
-  bestallningsvara: 'Beställningsvara',
-} as const;
 
 const SCHEMA_AVAILABILITY = {
   kontakta_oss: 'https://schema.org/PreOrder',
@@ -43,6 +38,23 @@ function buildProductJsonLd(product: ProductDetail) {
       availability: SCHEMA_AVAILABILITY[product.stockStatus],
     },
   };
+}
+
+function buildKeyFacts(product: ProductDetail): { label: string; value: string }[] {
+  const facts: { label: string; value: string }[] = [];
+  const maxCapacity = product.capacity.reduce(
+    (max, row) => Math.max(max, Number(row.barDiameterMm)),
+    0,
+  );
+
+  if (maxCapacity > 0) facts.push({ label: 'Kapacitet', value: `Ø${maxCapacity} mm` });
+  if (product.voltage) facts.push({ label: 'Spänning', value: `${product.voltage} V` });
+  if (product.powerWatts) facts.push({ label: 'Effekt', value: `${product.powerWatts} W` });
+  if (product.weightKg) {
+    facts.push({ label: 'Vikt', value: `${parseFloat(product.weightKg)} kg` });
+  }
+
+  return facts.slice(0, 4);
 }
 
 export async function generateStaticParams() {
@@ -72,6 +84,8 @@ export default async function ProductPage(props: PageProps<'/produkter/[category
   if (!product) notFound();
 
   const jsonLd = buildProductJsonLd(product);
+  const status = STOCK_STATUS_BADGE[product.stockStatus];
+  const keyFacts = buildKeyFacts(product);
 
   return (
     <Container className="py-12">
@@ -88,41 +102,55 @@ export default async function ProductPage(props: PageProps<'/produkter/[category
       </nav>
 
       <div className="grid gap-10 lg:grid-cols-2">
-        <div className="bg-muted aspect-square overflow-hidden rounded-xl">
+        <div className="relative aspect-4/3 overflow-hidden rounded-lg bg-[#efede8]">
           {product.primaryImage && (
             <Image
               src={product.primaryImage.url}
               alt={product.primaryImage.altText ?? product.name}
-              width={800}
-              height={800}
-              className="h-full w-full object-contain p-8"
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="object-contain p-8"
             />
           )}
         </div>
 
         <div>
-          <span className="text-muted-foreground text-sm">{product.brand.name}</span>
+          <span className="text-muted-foreground font-mono text-xs">{product.sku}</span>
           <h1 className="mt-1 text-3xl font-bold tracking-tight">{product.name}</h1>
           {product.shortDescription && (
             <p className="text-muted-foreground mt-3">{product.shortDescription}</p>
           )}
 
-          <div className="mt-4 flex items-center gap-3">
-            <Badge variant="outline">{STOCK_STATUS_LABEL[product.stockStatus]}</Badge>
-            {product.priceExVat ? (
-              <span className="font-medium">
-                {product.priceExVat} {product.currency} exkl. moms
-              </span>
-            ) : (
-              <span className="font-medium">Ring för pris</span>
-            )}
+          {keyFacts.length > 0 && (
+            <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-lg border">
+              {keyFacts.map((fact) => (
+                <div key={fact.label} className="bg-card p-4">
+                  <div className="text-muted-foreground text-xs">{fact.label}</div>
+                  <div className="font-mono text-lg font-medium">{fact.value}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="border-primary bg-card mt-6 flex items-center justify-between gap-4 border-l-[3px] p-4">
+            <div>
+              {product.priceExVat ? (
+                <span className="font-mono text-xl font-semibold">
+                  {product.priceExVat} {product.currency} exkl. moms
+                </span>
+              ) : (
+                <span className="text-xl font-semibold">Pris på begäran</span>
+              )}
+              <p className="text-muted-foreground mt-1 text-sm">Svar inom en arbetsdag.</p>
+            </div>
+            <Badge variant={status.variant}>{status.label}</Badge>
           </div>
 
           <div className="mt-6 flex flex-wrap gap-3">
             <Button size="lg" render={<a href="#offertformular" />}>
               Begär offert / Beställ
             </Button>
-            <Button size="lg" variant="outline" render={<a href={CONTACT.phoneHref} />}>
+            <Button size="lg" variant="secondary" render={<a href={CONTACT.phoneHref} />}>
               Ring {CONTACT.phone}
             </Button>
           </div>
@@ -135,7 +163,7 @@ export default async function ProductPage(props: PageProps<'/produkter/[category
 
       {product.specs.length > 0 && (
         <section className="mt-12">
-          <h2 className="mb-4 text-xl font-semibold">Specifikationer</h2>
+          <h2 className="mb-4 text-xl font-semibold">Tekniska data</h2>
           <SpecTable specs={product.specs} />
         </section>
       )}

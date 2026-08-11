@@ -1,19 +1,29 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Archivo, IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google';
 import { SiteHeader } from '@/components/layout/site-header';
 import { SiteFooter } from '@/components/layout/site-footer';
 import { CONTACT } from '@/lib/nav';
 import { SITE_URL } from '@/lib/site-config';
 import './globals.css';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+// Designmanual Armeringsmaskiner.se v1.0: Archivo for headings, IBM Plex
+// Sans for body/UI, IBM Plex Mono for article numbers/dimensions/price.
+const archivo = Archivo({
+  variable: '--font-archivo',
   subsets: ['latin'],
+  weight: ['500', '600', '700', '800'],
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const ibmPlexSans = IBM_Plex_Sans({
+  variable: '--font-plex-sans',
   subsets: ['latin'],
+  weight: ['400', '500', '600'],
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: '--font-plex-mono',
+  subsets: ['latin'],
+  weight: ['400', '500'],
 });
 
 export const metadata: Metadata = {
@@ -48,7 +58,10 @@ const organizationJsonLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="sv" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html
+      lang="sv"
+      className={`${archivo.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable} h-full antialiased`}
+    >
       <body className="flex min-h-full flex-col">
         <script
           type="application/ld+json"

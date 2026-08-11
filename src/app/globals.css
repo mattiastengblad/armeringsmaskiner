@@ -7,9 +7,15 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-sans: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
+  --font-heading: var(--font-archivo);
+  --color-status-instock: var(--status-instock);
+  --color-status-instock-bg: var(--status-instock-bg);
+  --color-status-backorder: var(--status-backorder);
+  --color-status-backorder-bg: var(--status-backorder-bg);
+  --color-status-quote: var(--status-quote);
+  --color-status-quote-bg: var(--status-quote-bg);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -35,6 +41,7 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -49,30 +56,39 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  /* Designmanual Armeringsmaskiner.se v1.0 — signalorange + grafit/betong */
+  --background: #f5f4f1; /* Betong */
+  --foreground: #101315; /* Grafit */
+  --card: #ffffff;
+  --card-foreground: #101315;
+  --popover: #ffffff;
+  --popover-foreground: #101315;
+  --primary: #f04e23; /* Signalorange */
+  --primary-foreground: #ffffff;
+  --primary-hover: #c93b15; /* Orange mörk */
+  --secondary: #101315; /* Grafit — sekundärknapp */
+  --secondary-foreground: #ffffff;
+  --muted: #ede9e3;
+  --muted-foreground: #6b7a80; /* Skiffer */
+  --accent: #ede9e3;
+  --accent-foreground: #101315;
+  --destructive: #b3261e; /* Fel */
+  --destructive-foreground: #ffffff;
+  --border: #dde2e1; /* Linje */
+  --input: #c9d0d2;
+  --ring: #f04e23;
+  --status-instock: #1f7a4d;
+  --status-instock-bg: #e7f2ec;
+  --status-backorder: #e8a400;
+  --status-backorder-bg: #fdf3dc;
+  --status-quote: #a5300f;
+  --status-quote-bg: #fdeae4;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+  --radius: 0.25rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -126,5 +142,14 @@
   }
   html {
     @apply font-sans;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.01em;
   }
 }
