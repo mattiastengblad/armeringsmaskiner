@@ -40,6 +40,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# pricing import sources (internal purchase costs — never commit)
+/data/pricing-import/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

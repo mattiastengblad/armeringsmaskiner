@@ -1,6 +1,7 @@
 import { and, asc, eq, isNull } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import * as schema from '@/lib/db/schema';
+import { computePricing, type PricingSettings } from '@/lib/pricing';
 import type {
   Accessory,
   Brand,
@@ -73,12 +74,51 @@ function findPublishedProducts(where?: Parameters<typeof db.query.products.findM
       brand: true,
       category: true,
       images: { orderBy: (images, { asc }) => [asc(images.sortOrder)] },
+      costInputs: true,
     },
   });
 }
 
-function toSummary(product: ProductWithRelations): ProductSummary {
+async function getActivePricingSettings(): Promise<PricingSettings | null> {
+  const row = await db.query.pricingSettings.findFirst({
+    where: eq(schema.pricingSettings.isActive, true),
+  });
+  if (!row) return null;
+  return {
+    eurToSekRate: Number(row.eurToSekRate),
+    freightMarkupMultiplier: Number(row.freightMarkupMultiplier),
+    resellerMarkupMultiplier: Number(row.resellerMarkupMultiplier),
+  };
+}
+
+function computeGrossPrice(
+  costInputs: (typeof schema.productCostInputs.$inferSelect)[],
+  settings: PricingSettings | null,
+): { amount: number; hasVariants: boolean } | null {
+  // Guessed cost bases (isUncertain) are withheld from public display until
+  // confirmed — they still show correctly in /admin/priser.
+  const confirmed = costInputs.filter((input) => !input.isUncertain);
+  if (!settings || confirmed.length === 0) return null;
+  const prices = confirmed.map(
+    (input) =>
+      computePricing(
+        {
+          gmsCreditPriceEur: Number(input.gmsCreditPriceEur),
+          freightPriceEur: Number(input.freightPriceEur),
+          targetCostRatio: Number(input.targetCostRatio),
+        },
+        settings,
+      ).grossPrice,
+  );
+  return { amount: Math.min(...prices), hasVariants: prices.length > 1 };
+}
+
+function toSummary(
+  product: ProductWithRelations,
+  settings: PricingSettings | null,
+): ProductSummary {
   const primaryImage = product.images[0] ? toImage(product.images[0]) : null;
+  const grossPrice = computeGrossPrice(product.costInputs, settings);
   return {
     id: product.id,
     sku: product.sku,
@@ -87,6 +127,8 @@ function toSummary(product: ProductWithRelations): ProductSummary {
     shortDescription: product.shortDescription,
     stockStatus: product.stockStatus,
     priceExVat: product.priceExVat,
+    computedGrossPriceSek: grossPrice?.amount ?? null,
+    hasMultiplePriceVariants: grossPrice?.hasVariants ?? false,
     currency: product.currency,
     isFeatured: product.isFeatured,
     isPublished: product.isPublished,
@@ -122,11 +164,14 @@ export async function getCategoryBySlug(slug: string): Promise<Category | undefi
 }
 
 export async function getFeaturedProducts(): Promise<ProductSummary[]> {
-  const rows = await findPublishedProducts({
-    where: and(eq(schema.products.isPublished, true), eq(schema.products.isFeatured, true)),
-    orderBy: asc(schema.products.sortOrder),
-  });
-  return rows.map(toSummary);
+  const [rows, settings] = await Promise.all([
+    findPublishedProducts({
+      where: and(eq(schema.products.isPublished, true), eq(schema.products.isFeatured, true)),
+      orderBy: asc(schema.products.sortOrder),
+    }),
+    getActivePricingSettings(),
+  ]);
+  return rows.map((row) => toSummary(row, settings));
 }
 
 export async function getProductsByCategorySlug(categorySlug: string): Promise<ProductSummary[]> {
@@ -135,11 +180,17 @@ export async function getProductsByCategorySlug(categorySlug: string): Promise<P
   });
   if (!category) return [];
 
-  const rows = await findPublishedProducts({
-    where: and(eq(schema.products.isPublished, true), eq(schema.products.categoryId, category.id)),
-    orderBy: asc(schema.products.sortOrder),
-  });
-  return rows.map(toSummary);
+  const [rows, settings] = await Promise.all([
+    findPublishedProducts({
+      where: and(
+        eq(schema.products.isPublished, true),
+        eq(schema.products.categoryId, category.id),
+      ),
+      orderBy: asc(schema.products.sortOrder),
+    }),
+    getActivePricingSettings(),
+  ]);
+  return rows.map((row) => toSummary(row, settings));
 }
 
 export async function getProductBySlugs(
@@ -151,28 +202,32 @@ export async function getProductBySlugs(
   });
   if (!category) return undefined;
 
-  const product = await db.query.products.findFirst({
-    where: and(
-      eq(schema.products.isPublished, true),
-      eq(schema.products.categoryId, category.id),
-      eq(schema.products.slug, productSlug),
-    ),
-    with: {
-      brand: true,
-      category: true,
-      images: { orderBy: (images, { asc }) => [asc(images.sortOrder)] },
-      specs: { orderBy: (specs, { asc }) => [asc(specs.sortOrder)] },
-      capacity: { orderBy: (capacity, { asc }) => [asc(capacity.sortOrder)] },
-      accessories: { orderBy: (accessories, { asc }) => [asc(accessories.sortOrder)] },
-      documents: { orderBy: (documents, { asc }) => [asc(documents.sortOrder)] },
-    },
-  });
+  const [product, settings] = await Promise.all([
+    db.query.products.findFirst({
+      where: and(
+        eq(schema.products.isPublished, true),
+        eq(schema.products.categoryId, category.id),
+        eq(schema.products.slug, productSlug),
+      ),
+      with: {
+        brand: true,
+        category: true,
+        images: { orderBy: (images, { asc }) => [asc(images.sortOrder)] },
+        specs: { orderBy: (specs, { asc }) => [asc(specs.sortOrder)] },
+        capacity: { orderBy: (capacity, { asc }) => [asc(capacity.sortOrder)] },
+        accessories: { orderBy: (accessories, { asc }) => [asc(accessories.sortOrder)] },
+        documents: { orderBy: (documents, { asc }) => [asc(documents.sortOrder)] },
+        costInputs: true,
+      },
+    }),
+    getActivePricingSettings(),
+  ]);
   if (!product) return undefined;
 
   const images = product.images.map(toImage);
 
   return {
-    ...toSummary(product),
+    ...toSummary(product, settings),
     description: product.description,
     powerWatts: product.powerWatts,
     voltage: product.voltage,

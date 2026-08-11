@@ -11,6 +11,7 @@ import { DocumentList } from '@/components/product/document-list';
 import { SpecTable } from '@/components/product/spec-table';
 import { getAllProductSlugsWithCategory, getProductBySlugs } from '@/lib/data/catalog';
 import { CONTACT } from '@/lib/nav';
+import { getDisplayPrice } from '@/lib/price-display';
 import { absoluteUrl } from '@/lib/site-config';
 import { STOCK_STATUS_BADGE } from '@/lib/status-labels';
 import type { ProductDetail } from '@/lib/types';
@@ -34,7 +35,11 @@ function buildProductJsonLd(product: ProductDetail) {
       '@type': 'Offer',
       url: absoluteUrl(`/produkter/${product.category.slug}/${product.slug}`),
       priceCurrency: product.currency,
-      ...(product.priceExVat ? { price: product.priceExVat } : {}),
+      ...(product.priceExVat
+        ? { price: product.priceExVat }
+        : product.computedGrossPriceSek != null
+          ? { price: product.computedGrossPriceSek }
+          : {}),
       availability: SCHEMA_AVAILABILITY[product.stockStatus],
     },
   };
@@ -86,6 +91,7 @@ export default async function ProductPage(props: PageProps<'/produkter/[category
   const jsonLd = buildProductJsonLd(product);
   const status = STOCK_STATUS_BADGE[product.stockStatus];
   const keyFacts = buildKeyFacts(product);
+  const displayPrice = getDisplayPrice(product);
 
   return (
     <Container className="py-12">
@@ -134,9 +140,12 @@ export default async function ProductPage(props: PageProps<'/produkter/[category
 
           <div className="border-primary bg-card mt-6 flex items-center justify-between gap-4 border-l-[3px] p-4">
             <div>
-              {product.priceExVat ? (
+              {displayPrice ? (
                 <span className="font-mono text-xl font-semibold">
-                  {Number(product.priceExVat).toLocaleString('sv-SE')} {product.currency} exkl. moms
+                  {displayPrice.amount}{' '}
+                  <span className="text-muted-foreground font-sans text-base font-normal">
+                    {displayPrice.note}
+                  </span>
                 </span>
               ) : (
                 <span className="text-xl font-semibold">Pris på begäran</span>

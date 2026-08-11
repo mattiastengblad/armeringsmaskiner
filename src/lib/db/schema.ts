@@ -275,6 +275,10 @@ export const productCostInputs = pgTable('product_cost_inputs', {
   pricingSettingsId: uuid('pricing_settings_id')
     .notNull()
     .references(() => pricingSettings.id, { onDelete: 'restrict' }),
+  // True when the cost basis is a guess rather than a confirmed price from
+  // Per — the computed gross price is withheld from public display until
+  // this is cleared.
+  isUncertain: boolean('is_uncertain').notNull().default(false),
   notes: text('notes'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

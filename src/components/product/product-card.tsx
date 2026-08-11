@@ -1,11 +1,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
+import { getDisplayPrice } from '@/lib/price-display';
 import { STOCK_STATUS_BADGE } from '@/lib/status-labels';
 import type { ProductSummary } from '@/lib/types';
 
 export function ProductCard({ product }: { product: ProductSummary }) {
   const status = STOCK_STATUS_BADGE[product.stockStatus];
+  const displayPrice = getDisplayPrice(product);
 
   return (
     <Link
@@ -37,9 +39,12 @@ export function ProductCard({ product }: { product: ProductSummary }) {
           <p className="text-muted-foreground line-clamp-2 text-sm">{product.shortDescription}</p>
         )}
         <div className="mt-auto pt-3">
-          {product.priceExVat ? (
+          {displayPrice ? (
             <span className="font-mono text-sm font-medium">
-              {Number(product.priceExVat).toLocaleString('sv-SE')} {product.currency} exkl. moms
+              {displayPrice.amount}{' '}
+              <span className="text-muted-foreground font-sans font-normal">
+                {displayPrice.note}
+              </span>
             </span>
           ) : (
             <span className="text-sm font-medium">Pris på begäran</span>

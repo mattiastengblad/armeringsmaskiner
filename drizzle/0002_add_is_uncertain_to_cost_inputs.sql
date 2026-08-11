@@ -1,0 +1,1 @@
+ALTER TABLE "product_cost_inputs" ADD COLUMN "is_uncertain" boolean DEFAULT false NOT NULL;

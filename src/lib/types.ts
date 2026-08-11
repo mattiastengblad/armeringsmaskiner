@@ -64,6 +64,10 @@ export interface ProductSummary {
   shortDescription: string | null;
   stockStatus: StockStatus;
   priceExVat: string | null;
+  /** Computed live from product_cost_inputs + the active pricing_settings row (not a stored column). */
+  computedGrossPriceSek: number | null;
+  /** True when multiple cost-input rows exist (e.g. voltage variants) and the lowest was picked. */
+  hasMultiplePriceVariants: boolean;
   currency: string;
   isFeatured: boolean;
   isPublished: boolean;
