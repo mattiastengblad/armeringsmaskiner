@@ -16,8 +16,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:seed": "tsx scripts/seed.ts",
-    "pricing:import": "tsx scripts/import-pricing.ts"
+    "db:seed": "tsx --env-file=.env.local scripts/seed.ts",
+    "pricing:import": "tsx --env-file=.env.local scripts/import-pricing.ts"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [

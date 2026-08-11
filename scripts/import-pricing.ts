@@ -18,15 +18,12 @@
  *   pnpm tsx scripts/import-pricing.ts "/path/to/GMS-kalkyler till AI 20210719 1.xlsx"
  *   pnpm tsx scripts/import-pricing.ts "/path/to/file.xlsx" --write
  */
-import { config } from 'dotenv';
 import XLSX from 'xlsx';
 import { computePricing, type PricingSettings } from '../src/lib/pricing';
 import {
   EXCEL_MODEL_MAPPING,
   PRODUCTS_WITHOUT_EXCEL_PRICING,
 } from '../src/lib/pricing-import/model-mapping';
-
-config({ path: '.env.local' });
 
 const DATA_SHEET_NAME = 'Data';
 const VALUES_SHEET_NAME = 'Värden';
