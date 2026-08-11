@@ -110,6 +110,10 @@ export const products = pgTable('products', {
   isPublished: boolean('is_published').notNull().default(false),
   isFeatured: boolean('is_featured').notNull().default(false),
   sortOrder: integer('sort_order').notNull().default(0),
+  // Bruttopris (list price) from the pricing engine — nullable until Per
+  // decides to show it publicly. See pricing_settings/product_cost_inputs
+  // below for the cost inputs it's computed from.
+  listPriceSek: numeric('list_price_sek', { precision: 10, scale: 2 }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
@@ -121,6 +125,7 @@ export const productImages = pgTable('product_images', {
     .references(() => products.id, { onDelete: 'cascade' }),
   url: text('url').notNull(),
   altText: text('alt_text'),
+  isPrimary: boolean('is_primary').notNull().default(false),
   sortOrder: integer('sort_order').notNull().default(0),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
@@ -230,6 +235,70 @@ export const profiles = pgTable('profiles', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
+// ---------- Pricing engine ----------
+// Rebuilds the "GMS-kalkyler till AI" Excel workbook as code. Strictly
+// internal — RLS blocks the anon role entirely on every table in this
+// section, regardless of a product's is_published status. See
+// src/lib/pricing.ts for the computation logic these feed.
+
+export const pricingSettings = pgTable('pricing_settings', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  // Human label for the constant set, e.g. "Bas" or "Dags" (Excel "Värden" tab).
+  label: text('label').notNull(),
+  eurToSekRate: numeric('eur_to_sek_rate', { precision: 10, scale: 4 }).notNull(),
+  freightMarkupMultiplier: numeric('freight_markup_multiplier', {
+    precision: 6,
+    scale: 4,
+  }).notNull(),
+  resellerMarkupMultiplier: numeric('reseller_markup_multiplier', {
+    precision: 6,
+    scale: 4,
+  }).notNull(),
+  isActive: boolean('is_active').notNull().default(false),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedBy: uuid('updated_by').references(() => profiles.id, { onDelete: 'set null' }),
+});
+
+export const productCostInputs = pgTable('product_cost_inputs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  productId: uuid('product_id')
+    .notNull()
+    .references(() => products.id, { onDelete: 'cascade' }),
+  // e.g. "220V" / "380V" / null when a product has no voltage variants.
+  variantLabel: text('variant_label'),
+  // Excel column B — GMS Kreditpris €.
+  gmsCreditPriceEur: numeric('gms_credit_price_eur', { precision: 10, scale: 2 }).notNull(),
+  // Excel column D — Frakt enl typoffert €.
+  freightPriceEur: numeric('freight_price_eur', { precision: 10, scale: 2 }).notNull(),
+  // Excel column G — "Påslag" på TIB (target TIB/bruttopris ratio), e.g. 0.375.
+  targetCostRatio: numeric('target_cost_ratio', { precision: 6, scale: 4 }).notNull(),
+  pricingSettingsId: uuid('pricing_settings_id')
+    .notNull()
+    .references(() => pricingSettings.id, { onDelete: 'restrict' }),
+  notes: text('notes'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const resellers = pgTable('resellers', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull(),
+  markupMultiplier: numeric('markup_multiplier', { precision: 6, scale: 4 }).notNull(),
+  notes: text('notes'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const resellerPrices = pgTable('reseller_prices', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  resellerId: uuid('reseller_id')
+    .notNull()
+    .references(() => resellers.id, { onDelete: 'cascade' }),
+  productId: uuid('product_id')
+    .notNull()
+    .references(() => products.id, { onDelete: 'cascade' }),
+  computedAt: timestamp('computed_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 // ---------- Relations ----------
 
 export const brandsRelations = relations(brands, ({ many }) => ({
@@ -254,6 +323,8 @@ export const productsRelations = relations(products, ({ one, many }) => ({
   accessories: many(accessories),
   documents: many(documents),
   orderItems: many(orderItems),
+  costInputs: many(productCostInputs),
+  resellerPrices: many(resellerPrices),
 }));
 
 export const productImagesRelations = relations(productImages, ({ one }) => ({
@@ -290,4 +361,25 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
 export const orderItemsRelations = relations(orderItems, ({ one }) => ({
   order: one(orders, { fields: [orderItems.orderId], references: [orders.id] }),
   product: one(products, { fields: [orderItems.productId], references: [products.id] }),
+}));
+
+export const pricingSettingsRelations = relations(pricingSettings, ({ many }) => ({
+  costInputs: many(productCostInputs),
+}));
+
+export const productCostInputsRelations = relations(productCostInputs, ({ one }) => ({
+  product: one(products, { fields: [productCostInputs.productId], references: [products.id] }),
+  pricingSettings: one(pricingSettings, {
+    fields: [productCostInputs.pricingSettingsId],
+    references: [pricingSettings.id],
+  }),
+}));
+
+export const resellersRelations = relations(resellers, ({ many }) => ({
+  prices: many(resellerPrices),
+}));
+
+export const resellerPricesRelations = relations(resellerPrices, ({ one }) => ({
+  reseller: one(resellers, { fields: [resellerPrices.resellerId], references: [resellers.id] }),
+  product: one(products, { fields: [resellerPrices.productId], references: [products.id] }),
 }));

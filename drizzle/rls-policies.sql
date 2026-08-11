@@ -22,6 +22,10 @@ alter table orders enable row level security;
 alter table order_items enable row level security;
 alter table customers enable row level security;
 alter table profiles enable row level security;
+alter table pricing_settings enable row level security;
+alter table product_cost_inputs enable row level security;
+alter table resellers enable row level security;
+alter table reseller_prices enable row level security;
 
 -- Helper: is the current user an admin?
 create or replace function is_admin()
@@ -111,4 +115,23 @@ create policy "users read own profile" on profiles
   for select using (auth.uid() = id or is_admin());
 
 create policy "admin write profiles" on profiles
+  for all using (is_admin()) with check (is_admin());
+
+-- ---------- Pricing engine: strictly internal, no anon access ever ----------
+-- These tables hold cost/margin data (GMS Kreditpris, TIB, target cost
+-- ratios, reseller markups). The anon role must never read them, regardless
+-- of a product's is_published status -- only the final list_price_sek on
+-- products (already covered by the public products policy above) may ever
+-- be shown publicly.
+
+create policy "admin only pricing_settings" on pricing_settings
+  for all using (is_admin()) with check (is_admin());
+
+create policy "admin only product_cost_inputs" on product_cost_inputs
+  for all using (is_admin()) with check (is_admin());
+
+create policy "admin only resellers" on resellers
+  for all using (is_admin()) with check (is_admin());
+
+create policy "admin only reseller_prices" on reseller_prices
   for all using (is_admin()) with check (is_admin());
