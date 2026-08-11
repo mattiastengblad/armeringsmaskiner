@@ -50,14 +50,14 @@ export default async function HomePage() {
               Eller ring direkt: {CONTACT.phone}
             </a>
           </div>
-          <div className="bg-muted relative aspect-video overflow-hidden rounded-xl">
+          <div className="bg-muted relative aspect-[4/5] overflow-hidden rounded-xl">
             <Image
-              src={productImageUrl('Par-b.png')}
-              alt="Per Lindgren, Armeringsmaskiner.se"
+              src={productImageUrl('par-bergman-hero.webp')}
+              alt="Pär Bergman, Armeringsmaskiner.se"
               fill
               priority
               sizes="(min-width: 1024px) 50vw, 100vw"
-              className="object-cover"
+              className="object-cover object-top"
             />
           </div>
         </Container>
