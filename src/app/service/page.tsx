@@ -14,13 +14,9 @@ export default function ServicePage() {
     <Container className="py-12">
       <h1 className="text-3xl font-bold tracking-tight">Service &amp; underhåll</h1>
       <p className="text-muted-foreground mt-4 max-w-2xl">
-        Vi hjälper dig hålla dina bock- och klippmaskiner i drift. Service och underhåll sker i
-        samarbete med vår partner Mekina, som säkerställer snabb och professionell hantering av din
-        maskinpark.
-      </p>
-      <p className="text-muted-foreground mt-4 max-w-2xl">
-        Kontakta oss för att boka service, beställa reservdelar eller om du har frågor om underhåll
-        av din maskin.
+        Bra grejer håller länge om de tas om hand på rätt sätt. Så självklart är service och
+        underhåll en viktig punkt på vår agenda. Därför samarbetar vi med de bästa — nämligen
+        Mekina. Det betyder att du kan ringa mig i alla lägen så fixar sig allt.
       </p>
       <div className="mt-6 flex flex-wrap gap-3">
         <Button size="lg" render={<Link href="/kontakt" />}>
