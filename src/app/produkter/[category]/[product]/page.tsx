@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { Container } from '@/components/layout/container';
+import { ContactForm } from '@/components/forms/contact-form';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CapacityTable } from '@/components/product/capacity-table';
@@ -118,7 +119,7 @@ export default async function ProductPage(props: PageProps<'/produkter/[category
           </div>
 
           <div className="mt-6 flex flex-wrap gap-3">
-            <Button size="lg" render={<Link href="/kontakt" />}>
+            <Button size="lg" render={<a href="#offertformular" />}>
               Begär offert / Beställ
             </Button>
             <Button size="lg" variant="outline" render={<a href={CONTACT.phoneHref} />}>
@@ -166,6 +167,14 @@ export default async function ProductPage(props: PageProps<'/produkter/[category
           <DocumentList documents={product.documents} />
         </section>
       )}
+
+      <section id="offertformular" className="mt-12 max-w-xl scroll-mt-24">
+        <h2 className="mb-4 text-xl font-semibold">Begär offert / Beställ {product.name}</h2>
+        <ContactForm
+          productId={product.id}
+          defaultMessage={`Jag är intresserad av ${product.name}.`}
+        />
+      </section>
     </Container>
   );
 }

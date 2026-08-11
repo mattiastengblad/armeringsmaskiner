@@ -7,24 +7,25 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { submitInquiry } from '@/lib/actions/inquiry';
 import { inquiryFormSchema, type InquiryFormValues } from '@/lib/validation/inquiry';
 
-// TODO(milestone 6): replace this stub with a Server Action that creates an
-// `inquiry` row and sends the notification email via Resend.
-async function submitInquiryStub(values: InquiryFormValues) {
-  await new Promise((resolve) => setTimeout(resolve, 400));
-  console.log('Inquiry submitted (stub):', values);
-}
-
-export function ContactForm({ productId }: { productId?: string }) {
+export function ContactForm({
+  productId,
+  defaultMessage,
+}: {
+  productId?: string;
+  defaultMessage?: string;
+}) {
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<InquiryFormValues>({
     resolver: zodResolver(inquiryFormSchema),
-    defaultValues: { productId },
+    defaultValues: { productId, message: defaultMessage },
   });
 
   if (submitted) {
@@ -38,8 +39,13 @@ export function ContactForm({ productId }: { productId?: string }) {
   return (
     <form
       onSubmit={handleSubmit(async (values) => {
-        await submitInquiryStub(values);
-        setSubmitted(true);
+        setSubmitError(null);
+        const result = await submitInquiry(values);
+        if (result.success) {
+          setSubmitted(true);
+        } else {
+          setSubmitError(result.error ?? 'Något gick fel. Försök igen eller ring oss direkt.');
+        }
       })}
       className="space-y-4"
     >
@@ -72,6 +78,8 @@ export function ContactForm({ productId }: { productId?: string }) {
           <p className="mt-1 text-sm text-destructive">{errors.message.message}</p>
         )}
       </div>
+
+      {submitError && <p className="text-sm text-destructive">{submitError}</p>}
 
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? 'Skickar…' : 'Skicka'}
