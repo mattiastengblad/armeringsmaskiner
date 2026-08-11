@@ -58,6 +58,7 @@ export interface DocumentItem {
 
 export interface ProductSummary {
   id: string;
+  sku: string;
   slug: string;
   name: string;
   shortDescription: string | null;
