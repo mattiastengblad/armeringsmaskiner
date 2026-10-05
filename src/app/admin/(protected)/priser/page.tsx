@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { PricingSettingsForm } from '@/components/admin/pricing-settings-form';
 import { ProductCostRow } from '@/components/admin/product-cost-row';
+import { fetchLatestEurSekRate } from '@/lib/riksbank';
 
 export const metadata: Metadata = {
   title: 'Priser',
@@ -13,13 +14,14 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminPricingPage() {
-  const [settings, products, costInputs] = await Promise.all([
+  const [settings, products, costInputs, riksbankRate] = await Promise.all([
     db.query.pricingSettings.findFirst({ where: eq(schema.pricingSettings.isActive, true) }),
     db.query.products.findMany({
       columns: { id: true, name: true, sku: true },
       orderBy: (products, { asc }) => [asc(products.name)],
     }),
     db.query.productCostInputs.findMany(),
+    fetchLatestEurSekRate(),
   ]);
 
   const costInputByProductId = new Map(costInputs.map((row) => [row.productId, row]));
@@ -51,6 +53,7 @@ export default async function AdminPricingPage() {
                 }
               : null
           }
+          riksbankRate={riksbankRate}
         />
       </section>
 
