@@ -5,15 +5,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { upsertActivePricingSettings } from '@/lib/actions/admin-pricing';
+import { BUDGET_RATE_MARGIN, budgetRateFromRiksbank, type RiksbankRate } from '@/lib/riksbank';
 
 export function PricingSettingsForm({
   initial,
+  riksbankRate,
 }: {
   initial: {
     eurToSekRate: string;
     freightMarkupMultiplier: string;
     resellerMarkupMultiplier: string;
   } | null;
+  riksbankRate: RiksbankRate | null;
 }) {
   const [eurToSekRate, setEurToSekRate] = useState(initial?.eurToSekRate ?? '11');
   const [freightMarkupMultiplier, setFreightMarkupMultiplier] = useState(
@@ -51,6 +54,22 @@ export function PricingSettingsForm({
           onChange={(e) => setEurToSekRate(e.target.value)}
           className="mt-1"
         />
+        <p className="text-muted-foreground mt-1 text-xs">
+          {riksbankRate ? (
+            <>
+              Riksbanken {riksbankRate.date}: {riksbankRate.value.toFixed(4)}{' '}
+              <button
+                type="button"
+                onClick={() => setEurToSekRate(String(budgetRateFromRiksbank(riksbankRate.value)))}
+                className="text-foreground underline underline-offset-2"
+              >
+                Använd +{BUDGET_RATE_MARGIN * 100} % ({budgetRateFromRiksbank(riksbankRate.value)})
+              </button>
+            </>
+          ) : (
+            'Riksbankens kurs kunde inte hämtas.'
+          )}
+        </p>
       </div>
       <div>
         <Label htmlFor="freight-markup">Fraktpåslag (×)</Label>
