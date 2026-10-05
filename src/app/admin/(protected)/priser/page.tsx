@@ -43,6 +43,18 @@ export default async function AdminPricingPage() {
           Motsvarar fliken &quot;Värden&quot; i GMS-kalkylen. En ändring här räknar om alla
           produktpriser nedan direkt.
         </p>
+        <ul className="text-muted-foreground mb-4 max-w-xl list-disc space-y-1 pl-5 text-sm">
+          <li>
+            <strong>€ → SEK-kurs:</strong> kronor per euro, t.ex. 11.52. Klicka på &quot;Använd +2
+            %&quot; för Riksbankens kurs med säkerhetsmarginal.
+          </li>
+          <li>
+            <strong>Fraktpåslag:</strong> extra buffert på frakten. 1.3 = +30 %, 1 = inget påslag.
+          </li>
+          <li>
+            <strong>FIK-påslag:</strong> återförsäljaren Kapers påslag på inpriset. 1.2 = +20 %.
+          </li>
+        </ul>
         <PricingSettingsForm
           initial={
             settings
@@ -64,6 +76,21 @@ export default async function AdminPricingPage() {
             <Badge variant="outline">{missingCostCount} produkter saknar kostnadsdata</Badge>
           )}
         </div>
+        <ul className="text-muted-foreground mb-4 max-w-2xl list-disc space-y-1 pl-5 text-sm">
+          <li>
+            <strong>GMS Kreditpris €:</strong> leverantörens inpris i euro, t.ex. 1820.
+          </li>
+          <li>
+            <strong>Frakt €:</strong> fraktkostnad i euro enligt offert, t.ex. 500. Fraktpåslaget
+            ovan läggs på automatiskt.
+          </li>
+          <li>
+            <strong>Påslag (TIB-kvot):</strong> hur stor del av bruttopriset som är kostnad. 0.3
+            betyder att kostnaden är 30 % av priset, dvs. bruttopris ≈ 3,3 × kostnaden (70 %
+            täckningsgrad). Lägre värde ger högre pris.
+          </li>
+          <li>Klicka på Spara på raden. TIB och Bruttopris räknas om medan du skriver.</li>
+        </ul>
         {!pricingSettings && (
           <p className="text-muted-foreground text-sm">
             Spara prisinställningarna ovan innan du lägger till produktpriser.
